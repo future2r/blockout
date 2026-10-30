@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>name.ulbricht</groupId>
+    <artifactId>blockout</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <name>Blockout</name>
+    <description>Remake of the 1989 DOS game Blockout (California Dreams)</description>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <java.version>27</java.version>
+        <javafx.version>27.0.1</javafx.version>
+        <junit.version>6.1.3</junit.version>
+        <main.class>name.ulbricht.blockout.Main</main.class>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-controls</artifactId>
+            <version>${javafx.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <version>3.6.3</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <requireMavenVersion>
+                                    <version>3.9</version>
+                                </requireMavenVersion>
+                                <!--
+                                  Maven itself must run on JDK 27: the jar plugin calls the jar tool
+                                  of the running JDK, which cannot read newer class files.
+                                -->
+                                <requireJavaVersion>
+                                    <version>${java.version}</version>
+                                </requireJavaVersion>
+                            </rules>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.16.0</version>
+                <configuration>
+                    <release>${java.version}</release>
+                    <compilerArgs>
+                        <arg>-Xlint:all</arg>
+                    </compilerArgs>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.6.1</version>
+                <configuration>
+                    <!-- Like the game itself, see exec-maven-plugin below -->
+                    <argLine>--enable-native-access=javafx.graphics</argLine>
+                </configuration>
+            </plugin>
+            <!--
+              Start with "mvnw compile exec:exec". The javafx-maven-plugin (0.0.8) cannot
+              read Java 27 class files and fails to detect the module, so the game is
+              launched directly on the module path with the JDK that runs Maven.
+            -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.6.4</version>
+                <configuration>
+                    <executable>${java.home}/bin/java</executable>
+                    <arguments>
+                        <argument>--module-path</argument>
+                        <modulepath/>
+                        <argument>--enable-native-access=javafx.graphics</argument>
+                        <argument>--module</argument>
+                        <argument>name.ulbricht.blockout/${main.class}</argument>
+                    </arguments>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

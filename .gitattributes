@@ -1,0 +1,8 @@
+# Text files are stored with LF; the shell wrapper must stay LF on every platform
+* text=auto eol=lf
+
+# Windows batch files need CRLF
+*.cmd text eol=crlf
+
+*.png binary
+*.jar binary
